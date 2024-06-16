@@ -1,10 +1,10 @@
 package com.myorg.config;
 
-import software.amazon.awscdk.services.apigateway.Resource;
-import software.amazon.awscdk.services.apigateway.LambdaIntegration;
-import software.amazon.awscdk.services.apigateway.RestApi;
+import software.amazon.awscdk.services.apigateway.*;
 import software.amazon.awscdk.services.lambda.Function;
 import software.constructs.Construct;
+
+import java.util.Collections;
 
 public class ApiGatewayConfig {
 
@@ -12,6 +12,11 @@ public class ApiGatewayConfig {
                                                Function getProductListLambda,
                                                Function getProductByIdLambda) {
         RestApi api = RestApi.Builder.create(scope, id)
+                .defaultCorsPreflightOptions(CorsOptions.builder()
+                        .allowOrigins(Cors.ALL_ORIGINS)
+                        .allowMethods(Cors.ALL_METHODS)
+                        .allowHeaders(Collections.singletonList("*"))
+                        .build())
                 .description("API GET запросов для получения информации о продуктах")
                 .build();
 
