@@ -1,8 +1,14 @@
 package com.myorg;
 
+import com.myorg.config.ApiGatewayConfig;
+import software.amazon.awscdk.services.apigateway.RestApi;
+import software.amazon.awscdk.services.lambda.Function;
 import software.constructs.Construct;
 import software.amazon.awscdk.Stack;
 import software.amazon.awscdk.StackProps;
+
+import static com.myorg.config.LambdaConfig.createGetProductByIdLambda;
+import static com.myorg.config.LambdaConfig.createGetProductListLambda;
 // import software.amazon.awscdk.Duration;
 // import software.amazon.awscdk.services.sqs.Queue;
 
@@ -14,11 +20,10 @@ public class AwsShopBackendStack extends Stack {
     public AwsShopBackendStack(final Construct scope, final String id, final StackProps props) {
         super(scope, id, props);
 
-        // The code that defines your stack goes here
+        Function getProductListLambda = createGetProductListLambda(this, "GetProductListLambda");
+        Function getProductByIdLambda = createGetProductByIdLambda(this, "GetProductByIdLambda");
 
-        // example resource
-        // final Queue queue = Queue.Builder.create(this, "AwsShopBackendQueue")
-        //         .visibilityTimeout(Duration.seconds(300))
-        //         .build();
+        RestApi api = ApiGatewayConfig.createGetRequestsApi(this, "ProductGetRequestsServiceApi",
+                getProductListLambda, getProductByIdLambda);
     }
 }
