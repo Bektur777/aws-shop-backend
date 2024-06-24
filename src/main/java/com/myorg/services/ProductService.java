@@ -56,13 +56,14 @@ public class ProductService {
 
     public void saveProduct(ProductDto productDto) {
         Product product = new Product();
-        product.setId(productDto.getId());
+        String productId = UUID.randomUUID().toString();
+        product.setId(productId);
         product.setTitle(productDto.getTitle());
         product.setDescription(productDto.getDescription());
         product.setPrice(productDto.getPrice());
 
         Stock stock = new Stock();
-        stock.setProductId(productDto.getId());
+        stock.setProductId(productId());
         stock.setCount(productDto.getCount());
 
         TransactionWriteRequest transactionRequest = new TransactionWriteRequest()
