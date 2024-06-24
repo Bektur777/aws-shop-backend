@@ -13,6 +13,7 @@ import com.myorg.exceptions.ProductNotFoundException;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class ProductService {
@@ -45,10 +46,19 @@ public class ProductService {
                 .toList();
     }
 
-    public Product getProductById(String id) {
+    public ProductDto getProductById(String id) {
         Product product = mapper.load(Product.class, id);
+        Stock stocks = mapper.load(Stock.class, id);
+
         if (product != null) {
-            return mapper.load(Product.class, id);
+            ProductDto productDto = new ProductDto();
+            productDto.setId(product.getId());
+            productDto.setTitle(product.getTitle());
+            productDto.setDescription(product.getDescription());
+            productDto.setPrice(product.getPrice());
+            productDto.setCount(stocks.getCount());
+
+            return productDto;
         } else {
             throw new ProductNotFoundException("Product with id " + id + " not found");
         }
@@ -63,7 +73,7 @@ public class ProductService {
         product.setPrice(productDto.getPrice());
 
         Stock stock = new Stock();
-        stock.setProductId(productId());
+        stock.setProductId(productId);
         stock.setCount(productDto.getCount());
 
         TransactionWriteRequest transactionRequest = new TransactionWriteRequest()
