@@ -5,13 +5,20 @@ AWS_REGION="eu-central-1"
 PRODUCTS_TABLE_NAME="products"
 STOCKS_TABLE_NAME="stocks"
 
+function generate_uuid {
+  uuidgen | tr '[:upper:]' '[:lower:]'
+}
+
+PRODUCT_1_UUID=$(generate_uuid)
+PRODUCT_2_UUID=$(generate_uuid)
+
 PRODUCTS_DATA=$(cat <<EOF
 {
   "$PRODUCTS_TABLE_NAME": [
     {
       "PutRequest": {
         "Item": {
-          "id": {"S": "a1a1a1a1-a1a1-a1a1-a1a1-a1a1a1a1a1a1"},
+          "id": {"S": "$PRODUCT_1_UUID"},
           "title": {"S": "Product 1"},
           "description": {"S": "Description 1"},
           "price": {"N": "10.99"}
@@ -21,7 +28,7 @@ PRODUCTS_DATA=$(cat <<EOF
     {
       "PutRequest": {
         "Item": {
-          "id": {"S": "b2b2b2b2-b2b2-b2b2-b2b2-b2b2b2b2b2b2"},
+          "id": {"S": "$PRODUCT_2_UUID"},
           "title": {"S": "Product 2"},
           "description": {"S": "Description 2"},
           "price": {"N": "20.99"}
@@ -39,7 +46,7 @@ STOCKS_DATA=$(cat <<EOF
     {
       "PutRequest": {
         "Item": {
-          "product_id": {"S": "a1a1a1a1-a1a1-a1a1-a1a1-a1a1a1a1a1a1"},
+          "product_id": {"S": "$PRODUCT_1_UUID"},
           "count": {"N": "100"}
         }
       }
@@ -47,7 +54,7 @@ STOCKS_DATA=$(cat <<EOF
     {
       "PutRequest": {
         "Item": {
-          "product_id": {"S": "b2b2b2b2-b2b2-b2b2-b2b2-b2b2b2b2b2b2"},
+          "product_id": {"S": "$PRODUCT_2_UUID"},
           "count": {"N": "50"}
         }
       }
