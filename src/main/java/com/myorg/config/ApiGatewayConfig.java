@@ -33,7 +33,7 @@ public class ApiGatewayConfig {
         product.addMethod("GET", getProductByIdLambdaIntegration);
 
         LambdaIntegration createProductLambdaIntegration = LambdaIntegration.Builder.create(createProductLambda).build();
-        products.addMethod("PUT", createProductLambdaIntegration);
+        products.addMethod("POST", createProductLambdaIntegration);
 
         return api;
     }

@@ -35,7 +35,7 @@ public class LambdaConfig {
     public static Function createGetProductByIdLambda(Construct construct, String id) {
         return createLambdaToManipulatingProducts(construct, id,
                 "com.myorg.lambdas.GetProductByIdHandler::handleRequest",
-                List.of(PRODUCT_TABLE_NAME), List.of(GET_ITEM));
+                List.of(PRODUCT_TABLE_NAME, STOCK_TABLE_NAME), List.of(GET_ITEM));
     }
 
     private static Function createLambdaToManipulatingProducts(Construct construct, String id,

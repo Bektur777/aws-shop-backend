@@ -3,14 +3,13 @@
 API_URL="https://wa015rf5vk.execute-api.eu-central-1.amazonaws.com/prod/products"
 
 create_product() {
-  local title=$2
-  local description=$3
-  local price=$4
-  local count=$5
+  local title=$1
+  local description=$2
+  local price=$3
+  local count=$4
 
   local product_json=$(cat <<EOF
 {
-  "id": "$id",
   "title": "$title",
   "description": "$description",
   "price": $price,

@@ -44,7 +44,7 @@ public class GetProductByIdHandler implements RequestHandler<Map<String, Object>
         headers.put("Access-Control-Allow-Methods", "GET");
 
         try {
-            Product productById = productService.getProductById(productId);
+            ProductDto productById = productService.getProductById(productId);
             logger.log("SUCCESS: " + productId);
             return apiResponse(200, headers, gson.toJson(productById));
         } catch (ProductNotFoundException e) {

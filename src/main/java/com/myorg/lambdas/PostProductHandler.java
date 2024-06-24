@@ -11,17 +11,23 @@ import com.myorg.services.ProductService;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PostProductHandler implements RequestHandler<ProductDto, ApiGatewayResponse> {
+public class PostProductHandler implements RequestHandler<Map<String, Object>, ApiGatewayResponse> {
 
     private final ProductService productService = new ProductService();
     private final Gson gson = new Gson();
 
     @Override
-    public ApiGatewayResponse handleRequest(ProductDto productDto, Context context) {
+    public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
         LambdaLogger logger = context.getLogger();
 
         logger.log("Request id: " + context.getAwsRequestId());
         logger.log("Function name: " + context.getFunctionName());
+
+        System.out.println("========================================================================================");
+        String body = (String) input.get("body");
+        System.out.println("Request body: " + body);
+
+        ProductDto productDto = gson.fromJson(body, ProductDto.class);
 
         /**
          * Validate ProductDto
@@ -30,23 +36,22 @@ public class PostProductHandler implements RequestHandler<ProductDto, ApiGateway
             logger.log("Validation failed for productDto: " + productDto);
             return ApiGatewayResponse.builder()
                     .statusCode(400)
-                    .body("Bad Request: Invalid product data")
+                    .body("Bad Request invalid product data")
                     .build();
         }
 
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json");
+        headers.put("Access-Control-Allow-Origin", "*");
+        headers.put("Access-Control-Allow-Methods", "POST");
+
         try {
-
-            Map<String, String> headers = new HashMap<>();
-            headers.put("Content-Type", "application/json");
-            headers.put("Access-Control-Allow-Origin", "*");
-            headers.put("Access-Control-Allow-Methods", "PUT");
-
             productService.saveProduct(productDto);
 
             return ApiGatewayResponse.builder()
                     .statusCode(200)
                     .headers(headers)
-                    .body(gson.toJson("{message: Ok}"))
+                    .body(gson.toJson("Ok"))
                     .build();
         }
         catch (Exception e) {
