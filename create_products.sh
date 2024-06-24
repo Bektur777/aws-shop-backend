@@ -1,34 +1,72 @@
 #!/bin/bash
 
-API_URL="https://wa015rf5vk.execute-api.eu-central-1.amazonaws.com/prod/products"
+AWS_REGION="eu-central-1"
 
-create_product() {
-  local title=$1
-  local description=$2
-  local price=$3
-  local count=$4
+PRODUCTS_TABLE_NAME="products"
+STOCKS_TABLE_NAME="stocks"
 
-  local product_json=$(cat <<EOF
+PRODUCTS_DATA=$(cat <<EOF
 {
-  "title": "$title",
-  "description": "$description",
-  "price": $price,
-  "count": $count
+  "$PRODUCTS_TABLE_NAME": [
+    {
+      "PutRequest": {
+        "Item": {
+          "id": {"S": "a1a1a1a1-a1a1-a1a1-a1a1-a1a1a1a1a1a1"},
+          "title": {"S": "Product 1"},
+          "description": {"S": "Description 1"},
+          "price": {"N": "10.99"}
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "id": {"S": "b2b2b2b2-b2b2-b2b2-b2b2-b2b2b2b2b2b2"},
+          "title": {"S": "Product 2"},
+          "description": {"S": "Description 2"},
+          "price": {"N": "20.99"}
+        }
+      }
+    }
+  ]
 }
 EOF
 )
 
-  response=$(curl -s -w "%{http_code}" -o /dev/null -X POST "$API_URL" \
-    -H "Content-Type: application/json" \
-    -d "$product_json")
+STOCKS_DATA=$(cat <<EOF
+{
+  "$STOCKS_TABLE_NAME": [
+    {
+      "PutRequest": {
+        "Item": {
+          "product_id": {"S": "a1a1a1a1-a1a1-a1a1-a1a1-a1a1a1a1a1a1"},
+          "count": {"N": "100"}
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "product_id": {"S": "b2b2b2b2-b2b2-b2b2-b2b2-b2b2b2b2b2b2"},
+          "count": {"N": "50"}
+        }
+      }
+    }
+  ]
+}
+EOF
+)
 
-  if [ "$response" -eq 200 ]; then
-    echo "Product $title created successfully."
-  else
-    echo "Failed to create product $title. Status code: $response"
-  fi
+function insert_items {
+  local data="$1"
+
+  aws dynamodb batch-write-item \
+    --request-items "$data" \
+    --region $AWS_REGION
 }
 
-create_product "Product 1" "Description for product 1" 10.0 100
-create_product "Product 2" "Description for product 2" 20.0 200
-create_product "Product 3" "Description for product 3" 30.0 300
+insert_items "$PRODUCTS_DATA"
+
+insert_items "$STOCKS_DATA"
+
+echo "Tables populated successfully!"
