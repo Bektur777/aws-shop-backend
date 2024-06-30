@@ -47,7 +47,8 @@ public class ParseProductsHandler implements RequestHandler<S3Event, String> {
 
                  CSVParser csvParser = CSVParser.parse(new String(contentBytes, StandardCharsets.UTF_8), CSVFormat.DEFAULT.withFirstRecordAsHeader());
                  for (CSVRecord csvRecord : csvParser) {
-                     logger.log("Record: " + csvRecord.toString());
+                     System.out.println(csvRecord.toString());
+                     logger.log("Record: " + csvRecord);
                  }
             }
 
