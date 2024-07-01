@@ -11,3 +11,9 @@ target
 .cdk.staging
 cdk.out
 
+# Dependencies
+layer
+import-service-dependencies.zip
+lambda-dependencies.zip
+s3-layer.zip
+log-dependencies.zip

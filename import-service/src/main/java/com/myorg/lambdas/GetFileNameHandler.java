@@ -52,8 +52,9 @@ public class GetFileNameHandler implements RequestHandler<Map<String, Object>, A
                     .build();
 
             PresignedGetObjectRequest presignedRequest = presigner.presignGetObject(presignRequest);
-            logger.log("Presigned URL: [{}]" + presignedRequest.url().toString(), LogLevel.INFO);
-            logger.log("HTTP method: [{}]" + presignedRequest.httpRequest().method(), LogLevel.INFO);
+            System.out.println("Bektur" + presignedRequest.url().toString());
+            logger.log("Presigned URL: [{}]" + presignedRequest.url().toString());
+            logger.log("HTTP method: [{}]" + presignedRequest.httpRequest().method());
             String presignedUrl = presignedRequest.url().toString();
 
             System.out.println("==============================================================================");
@@ -65,7 +66,7 @@ public class GetFileNameHandler implements RequestHandler<Map<String, Object>, A
                     .body("{\"presignedUrl\": \"" + presignedUrl + "\"}")
                     .build();
         } catch (Exception e) {
-            logger.log("Exception: " + e.getMessage(), LogLevel.ERROR);
+            logger.log("Exception: " + e.getMessage());
             return ApiResponse.builder()
                     .statusCode(500)
                     .body("{\"error\": \"" + e.getMessage() + "\"}")

@@ -53,7 +53,7 @@ public class LambdaConfig {
                 .architecture(Architecture.ARM_64)
                 .handler(handler)
                 .code(Code.fromAsset("target/import-service-0.1.jar"))
-                .timeout(Duration.seconds(20))
+                .timeout(Duration.seconds(40))
                 .build();
 
         function.addToRolePolicy(PolicyStatement.Builder.create()
