@@ -3,67 +3,66 @@ package com.myorg.lambdas;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.logging.LogLevel;
 import com.myorg.responses.ApiResponse;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
-public class GetFileNameHandler implements RequestHandler<Map<String, Object>, ApiResponse> {
+public class GetFileNameHandler implements RequestHandler<APIGatewayProxyRequestEvent, ApiResponse> {
 
     @Override
-    public ApiResponse handleRequest(Map<String, Object> input, Context context) {
+    public ApiResponse handleRequest(APIGatewayProxyRequestEvent input, Context context) {
         LambdaLogger logger = context.getLogger();
 
-        Map<String, String> pathParams = (Map<String, String>) input.get("queryStringParameters");
+        String fileName = input.getQueryStringParameters().get("name");
 
         logger.log("Request id: " + context.getAwsRequestId());
         logger.log("Function name: " + context.getFunctionName());
-        logger.log("Path parameters: " + pathParams.toString());
-
-        String fileName = pathParams.get("name");
-
-        if (fileName == null) {
-            return ApiResponse.builder()
-                    .statusCode(400)
-                    .body("{\"message\": \"Missing 'name' parameter\"}")
-                    .build();
-        }
+        logger.log("Path parameters: " + input);
 
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
         headers.put("Access-Control-Allow-Origin", "*");
-        headers.put("Access-Control-Allow-Methods", "GET");
+        headers.put("Access-Control-Allow-Methods", "*");
 
-        try(S3Presigner presigner = S3Presigner.create()) {
-            GetObjectRequest objectRequest = GetObjectRequest.builder()
+        if (fileName == null) {
+            return ApiResponse.builder()
+                    .statusCode(400)
+                    .headers(headers)
+                    .body("{\"message\": \"Missing 'name' parameter\"}")
+                    .build();
+        }
+
+        try (S3Presigner presigner = S3Presigner.create()) {
+            PutObjectRequest objectRequest = PutObjectRequest.builder()
                     .bucket("file-upload-rs-app")
                     .key("uploaded/" + fileName)
                     .build();
 
-            GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
+            PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
                     .signatureDuration(Duration.ofMinutes(1))
-                    .getObjectRequest(objectRequest)
+                    .putObjectRequest(objectRequest)
                     .build();
 
-            PresignedGetObjectRequest presignedRequest = presigner.presignGetObject(presignRequest);
-            System.out.println("Bektur" + presignedRequest.url().toString());
-            logger.log("Presigned URL: [{}]" + presignedRequest.url().toString());
-            logger.log("HTTP method: [{}]" + presignedRequest.httpRequest().method());
-            String presignedUrl = presignedRequest.url().toString();
+            PresignedPutObjectRequest presignedRequest = presigner.presignPutObject(presignRequest);
+            String presignedUrl = presignedRequest.url().toExternalForm();
 
-            System.out.println("==============================================================================");
-            System.out.println(presignedUrl);
+            logger.log("Presigned URL: " + presignedUrl);
 
             return ApiResponse.builder()
                     .statusCode(200)
                     .headers(headers)
-                    .body("{\"presignedUrl\": \"" + presignedUrl + "\"}")
+                    .body(presignedUrl)
                     .build();
         } catch (Exception e) {
             logger.log("Exception: " + e.getMessage());

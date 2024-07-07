@@ -20,7 +20,6 @@ public class ApiGatewayConfig {
                         .allowHeaders(Collections.singletonList("*"))
                         .build()
                 )
-                .cloudWatchRole(true)
                 .description("API запросов для работы с imports file service")
                 .build();
 

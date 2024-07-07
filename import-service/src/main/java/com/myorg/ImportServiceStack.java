@@ -1,17 +1,12 @@
 package com.myorg;
 
 import com.myorg.config.ApiGatewayConfig;
-import software.amazon.awscdk.RemovalPolicy;
-import software.amazon.awscdk.services.apigateway.Cors;
 import software.amazon.awscdk.services.apigateway.RestApi;
 import software.amazon.awscdk.services.lambda.Function;
-import software.amazon.awscdk.services.s3.BlockPublicAccess;
 import software.amazon.awscdk.services.s3.Bucket;
-import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.constructs.Construct;
 import software.amazon.awscdk.Stack;
@@ -47,7 +42,7 @@ public class ImportServiceStack extends Stack {
 
         PutObjectRequest request = PutObjectRequest.builder()
                 .bucket("file-upload-rs-app")
-                .key("uploaded/test.csv")
+                .key("uploaded/test5.csv")
                 .build();
 
         String content = """
@@ -58,9 +53,11 @@ public class ImportServiceStack extends Stack {
         s3Client.putObject(request, RequestBody.fromString(content));
 
 
-        Function importProductsFile = importProductsFile(this, "ImportProductsFile");
+        Function importProductsFile = importProductsFile(this, "ImportProductsFile", bucket);
+        bucket.grantReadWrite(importProductsFile);
 
         Function importFileParser = importFileParser(this, "importFileParser", bucket);
+        bucket.grantReadWrite(importProductsFile);
 
         RestApi restApi = ApiGatewayConfig.createApiRequest(this, "ImportProductsRequestsServiceApi",
                 importProductsFile);
