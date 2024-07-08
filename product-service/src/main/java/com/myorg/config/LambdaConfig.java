@@ -7,6 +7,10 @@ import software.amazon.awscdk.services.lambda.Architecture;
 import software.amazon.awscdk.services.lambda.Code;
 import software.amazon.awscdk.services.lambda.Function;
 import software.amazon.awscdk.services.lambda.Runtime;
+import software.amazon.awscdk.services.lambda.eventsources.SqsEventSource;
+import software.amazon.awscdk.services.lambda.eventsources.SqsEventSourceProps;
+import software.amazon.awscdk.services.sns.Topic;
+import software.amazon.awscdk.services.sqs.Queue;
 import software.constructs.Construct;
 
 import java.util.Collections;
@@ -19,6 +23,7 @@ public class LambdaConfig {
     private static final String PUT_ITEM = "dynamodb:PutItem";
     private static final String GET_ITEM = "dynamodb:GetItem";
     private static final String SCAN = "dynamodb:Scan";
+    private static final String SNS_PUBLISH = "sns:Publish";
 
     public static Function createPostProductLambda(Construct scope, String id) {
         return createLambdaToManipulatingProducts(scope, id,
@@ -38,13 +43,25 @@ public class LambdaConfig {
                 List.of(PRODUCT_TABLE_NAME, STOCK_TABLE_NAME), List.of(GET_ITEM));
     }
 
+    public static Function createCatalogBatchProcessLambda(Construct scope, String id, Queue catalogItemsQueue, Topic topic) {
+        Function function = createLambdaToManipulatingProducts(scope, id,
+                "com.myorg.lambdas.CatalogBatchProcessHandler::handleRequest",
+                List.of(PRODUCT_TABLE_NAME, STOCK_TABLE_NAME, topic.getTopicArn()), List.of(PUT_ITEM, SNS_PUBLISH));
+
+        function.addEventSource(new SqsEventSource(catalogItemsQueue, SqsEventSourceProps.builder()
+                .batchSize(5)
+                .build()));
+
+        return function;
+    }
+
     private static Function createLambdaToManipulatingProducts(Construct construct, String id,
                                                                String handler, List<String> resources, List<String> actions) {
         Function function = Function.Builder.create(construct, id)
                 .runtime(Runtime.JAVA_17)
                 .architecture(Architecture.ARM_64)
                 .handler(handler)
-                .code(Code.fromAsset("target/aws-shop-backend-0.1.jar"))
+                .code(Code.fromAsset("target/product-service-0.1.jar"))
                 .timeout(Duration.seconds(20))
                 .build();
 

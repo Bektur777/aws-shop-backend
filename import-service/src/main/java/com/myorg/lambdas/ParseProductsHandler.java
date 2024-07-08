@@ -10,8 +10,11 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import software.amazon.awssdk.core.ResponseBytes;
+import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
+import software.amazon.awssdk.services.sqs.SqsClient;
+import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -20,10 +23,13 @@ import java.util.Map;
 
 public class ParseProductsHandler implements RequestHandler<S3Event, String> {
 
+    private static final String QUEUE_URL = "https://sqs.eu-central-1.amazonaws.com/975050038015/catalogItemsQueue";
+
     @Override
     public String handleRequest(S3Event s3event, Context context) {
         LambdaLogger logger = context.getLogger();
         S3Client s3Client = S3Client.builder().build();
+        SqsClient sqsClient = SqsClient.builder().build();
         Gson gson = new Gson();
 
         try {
@@ -38,6 +44,7 @@ public class ParseProductsHandler implements RequestHandler<S3Event, String> {
                         .bucket(bucketName)
                         .key(objectKey)
                         .build();
+
                 ResponseBytes<GetObjectResponse> objectResponse = s3Client.getObjectAsBytes(getObjectRequest);
                 byte[] contentBytes = objectResponse.asByteArray();
                 String content = new String(contentBytes, StandardCharsets.UTF_8);
@@ -47,6 +54,13 @@ public class ParseProductsHandler implements RequestHandler<S3Event, String> {
                     Map<String, String> recordMap = new HashMap<>();
                     csvRecord.toMap().forEach(recordMap::put);
                     String jsonRecord = gson.toJson(recordMap);
+
+                    SendMessageRequest sendMsgRequest = SendMessageRequest.builder()
+                            .queueUrl(QUEUE_URL)
+                            .messageBody(jsonRecord)
+                            .build();
+                    sqsClient.sendMessage(sendMsgRequest);
+
                     logger.log("Record: " + jsonRecord);
                 }
 

@@ -4,6 +4,8 @@ import com.myorg.config.ApiGatewayConfig;
 import software.amazon.awscdk.services.apigateway.RestApi;
 import software.amazon.awscdk.services.lambda.Function;
 import software.amazon.awscdk.services.s3.Bucket;
+import software.amazon.awscdk.services.s3.CorsRule;
+import software.amazon.awscdk.services.s3.HttpMethods;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -11,6 +13,8 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.constructs.Construct;
 import software.amazon.awscdk.Stack;
 import software.amazon.awscdk.StackProps;
+
+import java.util.List;
 
 import static com.myorg.config.LambdaConfig.importFileParser;
 import static com.myorg.config.LambdaConfig.importProductsFile;
@@ -53,7 +57,7 @@ public class ImportServiceStack extends Stack {
         s3Client.putObject(request, RequestBody.fromString(content));
 
 
-        Function importProductsFile = importProductsFile(this, "ImportProductsFile", bucket);
+        Function importProductsFile = importProductsFile(this, "ImportProductsFile");
         bucket.grantReadWrite(importProductsFile);
 
         Function importFileParser = importFileParser(this, "importFileParser", bucket);

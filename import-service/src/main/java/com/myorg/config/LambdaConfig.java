@@ -19,34 +19,22 @@ import java.util.List;
 public class LambdaConfig {
 
     private static final String S3_RESOURCE_NAME = "arn:aws:s3:::file-upload-rs-app/*";
-    private static final String UPLOADED = "arn:aws:s3:::file-upload-rs-app/uploaded/";
-    private static final String PARSED = "arn:aws:s3:::file-upload-rs-app/parsed/";
+    private static final String SQS_RESOURCE_NAME = "arn:aws:sqs:eu-central-1:975050038015:catalogItemsQueue";
     private static final String S3_GET_OBJECT = "s3:GetObject";
-    public static final String S3_PUT_OBJECT = "s3:PutObject";
+    private static final String S3_PUT_OBJECT = "s3:PutObject";
+    private static final String SQS_SEND_MESSAGE = "sqs:SendMessage";
 
-    public static Function importProductsFile(Construct scope, String id, Bucket bucket) {
-            Function function = Function.Builder.create(scope, id)
-                    .runtime(Runtime.JAVA_17)
-                    .architecture(Architecture.ARM_64)
-                    .handler("com.myorg.lambdas.GetFileNameHandler::handleRequest")
-                    .code(Code.fromAsset("target/import-service-0.1.jar"))
-                    .timeout(Duration.seconds(40))
-                    .build();
-
-            function.addToRolePolicy(PolicyStatement.Builder.create()
-                    .effect(Effect.ALLOW)
-                    .actions(List.of(S3_GET_OBJECT, S3_PUT_OBJECT))
-                    .resources(List.of(S3_RESOURCE_NAME, UPLOADED))
-                    .build()
-            );
-
-            return function;
+    public static Function importProductsFile(Construct scope, String id) {
+            return createLambdaToManipulatingImports(scope, id,
+                    "com.myorg.lambdas.GetFileNameHandler::handleRequest",
+                    List.of(S3_GET_OBJECT, S3_PUT_OBJECT), List.of(S3_RESOURCE_NAME));
     }
 
     public static Function importFileParser(Construct scope, String id, Bucket bucket) {
         Function function = createLambdaToManipulatingImports(scope, id,
                 "com.myorg.lambdas.ParseProductsHandler::handleRequest",
-                List.of(S3_GET_OBJECT, S3_PUT_OBJECT), List.of(S3_RESOURCE_NAME, UPLOADED, PARSED));
+                List.of(S3_GET_OBJECT, S3_PUT_OBJECT, SQS_SEND_MESSAGE),
+                List.of(S3_RESOURCE_NAME, SQS_RESOURCE_NAME));
 
         S3EventSource s3EventSource = S3EventSource.Builder.create(bucket)
                 .events(Collections.singletonList(EventType.OBJECT_CREATED))

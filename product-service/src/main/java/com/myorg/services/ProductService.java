@@ -21,14 +21,16 @@ public class ProductService {
     private final AmazonDynamoDB client = AmazonDynamoDBClientBuilder.defaultClient();
     private final DynamoDBMapper mapper = new DynamoDBMapper(client);
 
-    private Gson gson = new Gson();
-
     public List<ProductDto> getAllProducts() {
         List<Product> products = mapper.scan(Product.class, new DynamoDBScanExpression());
         List<Stock> stocks = mapper.scan(Stock.class, new DynamoDBScanExpression());
 
+        products.forEach(System.out::println);
+
         Map<String, Integer> stockMap = stocks.stream()
                 .collect(Collectors.toMap(Stock::getProductId, Stock::getCount));
+
+        stocks.forEach(System.out::println);
 
         return products.stream()
                 .map(product -> {
