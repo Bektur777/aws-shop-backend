@@ -1,8 +1,14 @@
-package com.myorg;
+package kg.bektur;
 
+import software.amazon.awscdk.services.apigateway.RestApi;
+import software.amazon.awscdk.services.iam.ServicePrincipal;
+import software.amazon.awscdk.services.lambda.Function;
+import software.amazon.awscdk.services.lambda.Permission;
 import software.constructs.Construct;
 import software.amazon.awscdk.Stack;
 import software.amazon.awscdk.StackProps;
+
+import static kg.bektur.config.LambdaConfig.basicAuthorizerLambda;
 // import software.amazon.awscdk.Duration;
 // import software.amazon.awscdk.services.sqs.Queue;
 
@@ -20,5 +26,7 @@ public class AuthorizationServiceStack extends Stack {
         // final Queue queue = Queue.Builder.create(this, "AuthorizationServiceQueue")
         //         .visibilityTimeout(Duration.seconds(300))
         //         .build();
+
+        Function basicAuthorizerLambda = basicAuthorizerLambda(this, "BasicAuthorizationLambda");
     }
 }

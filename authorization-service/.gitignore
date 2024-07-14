@@ -11,3 +11,8 @@ target
 .cdk.staging
 cdk.out
 
+# Resources
+src/main/resources/application.properties
+
+# Dependencies
+layer

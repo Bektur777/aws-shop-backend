@@ -1,10 +1,7 @@
-package com.myorg;
+package kg.bektur;
 
 import software.amazon.awscdk.App;
-import software.amazon.awscdk.Environment;
 import software.amazon.awscdk.StackProps;
-
-import java.util.Arrays;
 
 public class AuthorizationServiceApp {
     public static void main(final String[] args) {

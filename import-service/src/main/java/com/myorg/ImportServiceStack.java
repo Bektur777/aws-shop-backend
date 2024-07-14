@@ -61,7 +61,7 @@ public class ImportServiceStack extends Stack {
         bucket.grantReadWrite(importProductsFile);
 
         Function importFileParser = importFileParser(this, "importFileParser", bucket);
-        bucket.grantReadWrite(importProductsFile);
+        bucket.grantReadWrite(importFileParser);
 
         RestApi restApi = ApiGatewayConfig.createApiRequest(this, "ImportProductsRequestsServiceApi",
                 importProductsFile);
