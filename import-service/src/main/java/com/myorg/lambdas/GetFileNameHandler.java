@@ -34,6 +34,7 @@ public class GetFileNameHandler implements RequestHandler<APIGatewayProxyRequest
         headers.put("Content-Type", "application/json");
         headers.put("Access-Control-Allow-Origin", "*");
         headers.put("Access-Control-Allow-Methods", "*");
+        headers.put("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
         if (fileName == null) {
             return ApiResponse.builder()
