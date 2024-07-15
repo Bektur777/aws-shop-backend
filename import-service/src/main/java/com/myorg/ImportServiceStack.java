@@ -36,25 +36,25 @@ public class ImportServiceStack extends Stack {
         //         .visibilityTimeout(Duration.seconds(300))
         //         .build();
 
-        S3Client s3Client = S3Client.builder()
-                .region(Region.EU_CENTRAL_1)
-                .build();
+//        S3Client s3Client = S3Client.builder()
+//                .region(Region.EU_CENTRAL_1)
+//                .build();
 
         Bucket bucket = Bucket.Builder.create(this, "ImportParse")
                 .bucketName("file-upload-rs-app")
                 .build();
 
-        PutObjectRequest request = PutObjectRequest.builder()
-                .bucket("file-upload-rs-app")
-                .key("uploaded/test5.csv")
-                .build();
-
-        String content = """
-                id,title,description,price,count
-                1,Title,description,5,10
-                2,Title,description,5,10
-                """;
-        s3Client.putObject(request, RequestBody.fromString(content));
+//        PutObjectRequest request = PutObjectRequest.builder()
+//                .bucket("file-upload-rs-app")
+//                .key("uploaded/test5.csv")
+//                .build();
+//
+//        String content = """
+//                id,title,description,price,count
+//                1,Title,description,5,10
+//                2,Title,description,5,10
+//                """;
+//        s3Client.putObject(request, RequestBody.fromString(content));
 
 
         Function importProductsFile = importProductsFile(this, "ImportProductsFile");

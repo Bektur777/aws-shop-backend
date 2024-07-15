@@ -23,13 +23,11 @@ public class LambdaConfig {
     private static final String S3_GET_OBJECT = "s3:GetObject";
     private static final String S3_PUT_OBJECT = "s3:PutObject";
     private static final String SQS_SEND_MESSAGE = "sqs:SendMessage";
-    private static final String LAMBDA_INVOKE = "lambda:InvokeFunction";
-    private static final String LAMBDA_ARN = "arn:aws:lambda:eu-central-1:975050038015:function:AuthorizationServiceStack-BasicAuthorizationLambda-ymNP1ZLIK1sg";
 
     public static Function importProductsFile(Construct scope, String id) {
             return createLambdaToManipulatingImports(scope, id,
                     "com.myorg.lambdas.GetFileNameHandler::handleRequest",
-                    List.of(S3_GET_OBJECT, S3_PUT_OBJECT, LAMBDA_INVOKE), List.of(S3_RESOURCE_NAME, LAMBDA_ARN));
+                    List.of(S3_GET_OBJECT, S3_PUT_OBJECT), List.of(S3_RESOURCE_NAME));
     }
 
     public static Function importFileParser(Construct scope, String id, Bucket bucket) {

@@ -11,6 +11,7 @@ import software.constructs.Construct;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static software.amazon.awscdk.services.apigateway.Cors.ALL_METHODS;
 import static software.amazon.awscdk.services.apigateway.Cors.ALL_ORIGINS;
@@ -32,19 +33,42 @@ public class ApiGatewayConfig {
                 .description("API запросов для работы с imports file service")
                 .build();
 
-        Resource importResource = restApi.getRoot().addResource("import");
-
-        LambdaIntegration lambdaIntegration = LambdaIntegration.Builder.create(importProductsFile)
-                .build();
-
         RequestAuthorizer authorizer = RequestAuthorizer.Builder.create(scope, "BasicAuthorizer")
                 .handler(basicAuthorizerLambda)
                 .identitySources(Collections.singletonList(IdentitySource.header("Authorization")))
                 .build();
 
+        Resource importResource = restApi.getRoot().addResource("import");
+
+        LambdaIntegration lambdaIntegration = LambdaIntegration.Builder.create(importProductsFile)
+                .build();
+
         importResource.addMethod("GET", lambdaIntegration, MethodOptions.builder()
                 .authorizationType(AuthorizationType.CUSTOM)
                 .authorizer(authorizer)
+                .methodResponses(List.of(
+                        MethodResponse.builder()
+                                .statusCode("200")
+                                .responseParameters(Map.of(
+                                        "method.response.header.Access-Control-Allow-Origin", true,
+                                        "method.response.header.Access-Control-Allow-Headers", true,
+                                        "method.response.header.Access-Control-Allow-Methods", true))
+                                .build(),
+                        MethodResponse.builder()
+                                .statusCode("401")
+                                .responseParameters(Map.of(
+                                        "method.response.header.Access-Control-Allow-Origin", true,
+                                        "method.response.header.Access-Control-Allow-Headers", true,
+                                        "method.response.header.Access-Control-Allow-Methods", true))
+                                .build(),
+                        MethodResponse.builder()
+                                .statusCode("403")
+                                .responseParameters(Map.of(
+                                        "method.response.header.Access-Control-Allow-Origin", true,
+                                        "method.response.header.Access-Control-Allow-Headers", true,
+                                        "method.response.header.Access-Control-Allow-Methods", true))
+                                .build()
+                ))
                 .build());
 
         return restApi;
